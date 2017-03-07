@@ -20,15 +20,11 @@ import cucumber.api.java.en.When;
 
 public class GEDO_Ingreso_Firma_Simple {
 	private WebDriver driver;
-	// private String baseUrl;
 	private StringBuffer verificationErrors = new StringBuffer();
 	WebDriverWait wait;
 
 	@Before
 	public void setUp() throws Exception {
-		// driver = new FirefoxDriver();
-		// baseUrl = "https://cas.nac.everis.int/";
-		// driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 		System.setProperty("webdriver.gecko.driver", "C:\\WebDrivers\\geckodriver.exe");
 		// Fix problema certificado
 		ProfilesIni allProfiles = new ProfilesIni();
@@ -55,50 +51,42 @@ public class GEDO_Ingreso_Firma_Simple {
 
 	@When("^El usuario ingresa al sistema con sus credenciales: usuario \"(.*)\" y password \"(.*)\"$")
 	public void datosLogin(String usuario, String password) {
-		// System.out.println("Usuario: " + usuario);
-		// System.out.println("Password: " + password);
-		driver.findElement(By.xpath("/html/body/div/div[2]/div[2]/div/div/div/div/div[2]/div/input")).clear();
-		driver.findElement(By.xpath("/html/body/div/div[2]/div[2]/div/div/div/div/div[2]/div/input")).sendKeys(usuario);
-		driver.findElement(By.xpath("/html/body/div/div[2]/div[2]/div/div/div/div/div[3]/div/input")).clear();
-		driver.findElement(By.xpath("/html/body/div/div[2]/div[2]/div/div/div/div/div[3]/div/input"))
-				.sendKeys(password);
-		// WebElement element = wait.until(ExpectedConditions
-		// .elementToBeClickable(By.xpath("/html/body/div/div[2]/div[2]/div/div/div/div/div[4]/button")));
-		driver.findElement(By.xpath("/html/body/div/div[2]/div[2]/div/div/div/div/div[4]/button")).click();
+		driver.findElement(By.xpath("//*[@placeholder='Usuario']")).clear();
+		driver.findElement(By.xpath("//*[@placeholder='Usuario']")).sendKeys(usuario);
+		driver.findElement(By.xpath("//*[@placeholder='Contraseña']")).clear();
+		driver.findElement(By.xpath("//*[@placeholder='Contraseña']")).sendKeys(password);
+		driver.findElement(By.xpath("//*[@class='btn btn-default z-button']")).click();
 	}
 
 	// @Test
 	@When("^El usuario firma una tarea de firma simple con certificado$")
 	public void testGEDOIngresoFirmaSimple() throws Exception {
 		driver.findElement(By.xpath("//td/img")).click();
-		for (int second = 0;; second++) {
-			if (second >= 60)
-				fail("timeout");
-			try {
-				if (isElementPresent(By.xpath("//td[5]/div/div/div/img")))
-					break;
-			} catch (Exception e) {
-			}
-			Thread.sleep(1000);
-		}
-
+		this.waitElementIsPresentByXPath("//td[5]/div/div/div/img");
 		driver.findElement(By.xpath("//td[5]/div/div/div/img")).click();
 		/*
 		 * Cerrar cartel de firma de documento y volver a la bandeja de inicio
 		 */
+		this.waitElementIsPresentByXPath("//td[2]/div/div/div/div/img");
+		driver.findElement(By.xpath("//td[2]/div/div/div/div/img")).click();
+	}
+
+	/**
+	 * Método extraído, se deberá crear una API que realice estas esperas por XPath
+	 * @param xpath
+	 * @throws InterruptedException
+	 */
+	private void waitElementIsPresentByXPath(String xpath) throws InterruptedException {
 		for (int second = 0;; second++) {
 			if (second >= 60)
 				fail("timeout");
 			try {
-				if (isElementPresent(By.xpath("//td[2]/div/div/div/div/img")))
+				if (isElementPresent(By.xpath(xpath)))
 					break;
 			} catch (Exception e) {
 			}
 			Thread.sleep(1000);
 		}
-
-		driver.findElement(By.xpath("//td[2]/div/div/div/div/img")).click();
-
 	}
 
 	@Then("^Se genera un número de documento GDE$")
@@ -111,7 +99,7 @@ public class GEDO_Ingreso_Firma_Simple {
 		System.out.println("Mensaje de confirmación: " + mensajeGeneracionDocumento);
 		/**
 		 * TODO: Generar validación de mensaje de documento generado
-		 * */
+		 */
 	}
 
 	@After
